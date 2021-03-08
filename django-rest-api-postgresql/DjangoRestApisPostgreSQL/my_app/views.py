@@ -2,9 +2,10 @@ import logging
 
 from django.http.response import JsonResponse
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
-
 from my_app.models import User
 from my_app.serializers import UserSerializer
 from django.views.decorators.cache import cache_page
@@ -15,12 +16,14 @@ logger = logging.getLogger("user_view")
 
 # Hands on for Django basic CRUD with postgres as DB
 
-@cache_page(60 * 5)
+# @cache_page(60 * 5)
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def user_list(request):
-    tutorials = None
     if request.method == 'GET':
         print("inside the GET method")
+        print(request.auth)
         users = User.objects.all()
         username = request.GET.get('username', None)
         if username is not None:
